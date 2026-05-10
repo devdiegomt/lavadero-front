@@ -1,7 +1,14 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-export default function ProtectedRoute({ children }) {
+/**
+ * Guard de ruta para el panel de super_admin.
+ * - Si está cargando → spinner
+ * - Si no está autenticado → /login
+ * - Si está autenticado pero no es super_admin → / (su lavadero)
+ * - Si es super_admin → renderiza children
+ */
+export default function SuperAdminRoute({ children }) {
   const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) {
@@ -19,10 +26,8 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  // El super_admin no tiene tenant_id, así que no puede usar la app del lavadero.
-  // Lo redirigimos a su panel.
-  if (user?.role === 'super_admin') {
-    return <Navigate to="/admin" replace />;
+  if (user?.role !== 'super_admin') {
+    return <Navigate to="/" replace />;
   }
 
   return children;
